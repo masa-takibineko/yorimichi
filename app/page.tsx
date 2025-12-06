@@ -444,6 +444,9 @@ export default function Home() {
         <p className="w-full max-w-md text-center text-[#6f5237] text-base font-semibold tracking-wide mt-2">
           素敵な散歩道を思い出と共に教えて下さい
         </p>
+        <p className="w-full max-w-md text-center text-[#8b7964] text-xs mt-1">
+          あなたのアカウント名: <span className="font-semibold text-[#6b5742]">{userNickname || "あなた"}</span>
+        </p>
       </header>
       {/* インタラクティブな日本地図 */}
       <section className="relative z-0 w-full h-[80vh] px-4 pb-6">
