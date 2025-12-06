@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Heart, MapPin, Plus, Search, Trash2, Trophy } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { getUserId } from "../lib/userId";
+import { getOrCreateNickname } from "../lib/userNickname";
 
 // ダミーデータ（初期の道草）: Supabase に何もない場合の初期表示用
 const initialPhotos = [
@@ -94,6 +95,7 @@ export default function Home() {
   const [userId] = useState<string>(() => getUserId());
   const [todayPostCount, setTodayPostCount] = useState<number>(0);
   const [mostPopularPhoto, setMostPopularPhoto] = useState<Photo | null>(null);
+  const [userNickname, setUserNickname] = useState("");
 
   // Leaflet map 用の ref（型は簡略化）
   const mapRef = useRef<any | null>(null);
@@ -107,6 +109,11 @@ export default function Home() {
   // Supabase から投稿済みの写真を読み込む
   useEffect(() => {
     let cancelled = false;
+
+    // 初回にニックネームを確定
+    if (!cancelled && typeof window !== "undefined") {
+      setUserNickname(getOrCreateNickname());
+    }
 
     const tableMissingHint =
       `Supabase のテーブルが未作成です。` +
@@ -442,8 +449,8 @@ export default function Home() {
       <section className="relative z-0 w-full h-[80vh] px-4 pb-6">
         <div className="w-full h-full max-w-4xl mx-auto rounded-[24px] overflow-hidden shadow-xl border border-[#e0d3bf] relative">
           {isPostSelecting && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1200] rounded-full bg-[#f6efe1]/95 text-[#6b5742] text-xs sm:text-sm px-4 py-2 shadow-md border border-[#e0d4c3]">
-              地図の好きな場所を一度タップして、道草の場所を選んでください
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[2000] rounded-full bg-[#f8e6c9] text-[#5a3f25] text-sm sm:text-base font-semibold px-5 py-3 shadow-xl border border-[#e2b980] drop-shadow-lg">
+              投稿したい場所をクリック — やめるときはもう一度「投稿」を押してください
             </div>
           )}
           {/* Leaflet が描画する本体 */}
@@ -465,16 +472,17 @@ export default function Home() {
       </section>
       {/* 投稿ボタン */}
       <button
-        className="fixed bottom-7 right-7 bg-[#ede7da] hover:bg-[#e2d8c6] text-[#947962] shadow-xl rounded-full p-4 flex items-center justify-center border border-[#dbcab1] transition focus:outline-none z-[1500]"
-        aria-label="新しい道草を投稿"
+        className="fixed bottom-7 right-7 bg-[#c9a887] hover:bg-[#b89676] text-white shadow-xl rounded-full px-6 py-3 flex items-center justify-center gap-2 border border-[#b48961] transition focus:outline-none z-[1500] min-w-[120px]"
+        aria-label="投稿モードを切り替え"
         onClick={() => {
           setSelectedPhoto(null); // 既存の写真ビューは閉じる
-          setIsPostOpen(false); // まず投稿フォームは閉じておく
+          setIsPostOpen(false); // 投稿フォームは閉じておく
           setPendingLatLng(null); // 位置はこれから選ぶ
-          setIsPostSelecting(true); // 地図タップ待ちモードへ
+          setIsPostSelecting((prev) => !prev); // もう一度押すと解除
         }}
       >
-        <Plus className="w-7 h-7" />
+        <Plus className="w-5 h-5" />
+        <span className="text-sm font-semibold tracking-wide">投稿</span>
       </button>
       {/* Photo Detail Drawer */}
       <PhotoDetailDrawer
@@ -547,6 +555,7 @@ export default function Home() {
         pendingLatLng={pendingLatLng}
         initialCenter={initialCenter}
         userId={userId}
+        userNickname={userNickname}
         todayPostCount={todayPostCount}
       />
     </main>
@@ -560,6 +569,7 @@ function PostDrawer({
   initialCenter,
   pendingLatLng,
   userId,
+  userNickname,
   todayPostCount,
 }: {
   open: boolean;
@@ -568,6 +578,7 @@ function PostDrawer({
   initialCenter: [number, number];
   pendingLatLng: [number, number] | null;
   userId: string;
+  userNickname: string;
   todayPostCount: number;
 }) {
   const [title, setTitle] = useState("");
@@ -687,7 +698,7 @@ function PostDrawer({
         location: loc,
         title: tit,
         episode: ep,
-        author: "あなた",
+        author: userNickname || "あなた",
         user_id: userId,
         lat,
         lng,
@@ -730,7 +741,7 @@ function PostDrawer({
       location: data.location,
       title: data.title || "",
       votes: 0,
-      author: data.author ?? "あなた",
+      author: (data.author ?? userNickname) || "あなた",
       user_id: data.user_id || userId,
       episode: data.episode,
       lat: data.lat,
