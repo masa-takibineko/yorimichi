@@ -25,6 +25,7 @@ function classNames(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+
 export default function MyPostsPage() {
   const [myPhotos, setMyPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,6 +110,7 @@ export default function MyPostsPage() {
       minute: "2-digit",
     });
   };
+  
 
   return (
     <main className="min-h-screen w-full bg-[#f7f2ea] pb-20">
@@ -198,4 +200,5 @@ export default function MyPostsPage() {
     </main>
   );
 }
+
 
