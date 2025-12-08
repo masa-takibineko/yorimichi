@@ -25,6 +25,8 @@ function classNames(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+const PAYPAY_LINK = "https://pay.paypay.ne.jp/あなたのリンク";
+
 export default function MyPostsPage() {
   const [myPhotos, setMyPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,6 +131,20 @@ export default function MyPostsPage() {
 
       {/* コンテンツ */}
       <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mb-6 rounded-lg border border-[#e4dccc] bg-white/80 px-3 py-2 text-sm text-[#6b5947] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <p>
+            このアプリを気に入ってくれたら、
+            <span className="font-semibold">PayPay</span> でそっと応援してもらえると嬉しいです ☕️
+          </p>
+          <a
+            href={PAYPAY_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center rounded-md bg-red-500 text-white px-3 py-1.5 text-xs font-medium hover:bg-red-600 transition"
+          >
+            ❤️ PayPayで応援する
+          </a>
+        </div>
         {loading ? (
           <div className="text-center text-[#7c6c57] py-12">
             読み込み中...

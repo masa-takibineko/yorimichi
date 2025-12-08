@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Heart, MapPin, Plus, Search, Trash2, Trophy } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { getUserId } from "../lib/userId";
-import { getOrCreateNickname } from "../lib/userNickname";
+import { getOrCreateNickname, setNickname } from "../lib/userNickname";
 
 // ダミーデータ（初期の道草）: Supabase に何もない場合の初期表示用
 const initialPhotos = [
@@ -96,6 +96,7 @@ export default function Home() {
   const [todayPostCount, setTodayPostCount] = useState<number>(0);
   const [mostPopularPhoto, setMostPopularPhoto] = useState<Photo | null>(null);
   const [userNickname, setUserNickname] = useState("");
+  const [nicknameInput, setNicknameInput] = useState("");
 
   // Leaflet map 用の ref（型は簡略化）
   const mapRef = useRef<any | null>(null);
@@ -112,7 +113,9 @@ export default function Home() {
 
     // 初回にニックネームを確定
     if (!cancelled && typeof window !== "undefined") {
-      setUserNickname(getOrCreateNickname());
+      const nickname = getOrCreateNickname();
+      setUserNickname(nickname);
+      setNicknameInput(nickname);
     }
 
     const tableMissingHint =
@@ -447,6 +450,34 @@ export default function Home() {
         <p className="w-full max-w-md text-center text-[#8b7964] text-xs mt-1">
           あなたのアカウント名: <span className="font-semibold text-[#6b5742]">{userNickname || "あなた"}</span>
         </p>
+        <form
+          className="mt-3 w-full max-w-md mx-auto flex items-center gap-2 text-xs sm:text-sm text-[#6b5742]"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const trimmed = nicknameInput.trim();
+            if (!trimmed) return;
+            setNickname(trimmed);
+            setUserNickname(trimmed);
+          }}
+        >
+          <label className="whitespace-nowrap" htmlFor="nickname-input">
+            ニックネームを変更:
+          </label>
+          <input
+            id="nickname-input"
+            type="text"
+            value={nicknameInput}
+            onChange={(e) => setNicknameInput(e.target.value)}
+            className="flex-1 rounded-md border border-[#d8c7ad] bg-white/80 px-3 py-2 text-[#5a3f25] placeholder:text-[#b09b80] focus:outline-none focus:ring-2 focus:ring-[#c9a887]"
+            placeholder="例: 旅好き太郎"
+          />
+          <button
+            type="submit"
+            className="rounded-md bg-[#c9a887] px-3 py-2 text-white font-semibold shadow-sm hover:bg-[#b89676] border border-[#b48961] transition"
+          >
+            保存
+          </button>
+        </form>
       </header>
       {/* インタラクティブな日本地図 */}
       <section className="relative z-0 w-full h-[80vh] px-4 pb-6">
